@@ -1,0 +1,60 @@
+//* models
+const Bookmark = require('../../models/bookmarks');
+const Post = require('../../models/posts');
+
+module.exports = {
+    Query: {
+        //* GET_BOOKMARKS: get logged user saved bookmarks
+        async getBookmarks(parent, args, context, info) {
+            //* Check if logged user has the right to get the bookmarks or no
+            const { username } = checkAuth(context);
+            //* fetch and return bookmarks list if exist
+            try {
+                const bookmarks = await Bookmark.find({ username });
+                return bookmarks
+                .map(bookmark => ({
+                    ...bookmark._doc,
+                    bookmarkID: bookmark._id
+                }));
+            } catch(err) {
+                throw new Error('empty bookmarks list');
+            }
+        }
+    },
+
+    Mutation: {
+        //* TOGGLE_BOOKMARK: if a post exist in bookmarks list remove it else add it
+        async toggleBookmark(parent, args, context, info) {
+            //* Check if logged user has the right to toggle bookmarks or not
+            const { username } = checkAuth(context);
+            const { postID } = args;
+            //* if the post doesn't exist throw an error
+            const post = await post.findById(postID);
+            if (!post) {
+                throw new Error('post does not exist');
+            }
+            //* if the post isn't bookmarked add it
+            const bookmark = await Bookmark.findOne({ postID });
+            if (!bookmark) {
+                //* create, save and return the bookmark
+                const newBookmark = new Bookmark({
+                    username,
+                    postID,
+                    bookmarkedAt: new Date().toISOString()
+                });
+                const res = await newBookmark.save();
+                return {
+                    ...res._doc,
+                    bookmarkID: res._id
+                }
+            } else {
+                //* remove the bookmark and return it
+                bookmark.remove();
+                return {
+                    ...bookmark._doc,
+                    bookmarkID: bookmark._id
+                };
+            }
+        }
+    }
+}
