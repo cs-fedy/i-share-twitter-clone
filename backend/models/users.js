@@ -7,7 +7,6 @@ const userSchema = new Schema({
     accountCreatedAt: String,
     accountType: String,
     bio: String,
-    accountUpdatedAt: String,
     gender: String,
     profilePictureURL: String,
     country: String,
