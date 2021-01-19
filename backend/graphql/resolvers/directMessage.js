@@ -3,7 +3,6 @@ const DM = require("../../models/directMessages");
 const Message = require("../../models/messages");
 //* utils
 const checkAuth = require("../../util/checkAuth");
-const user = require("./user");
 
 module.exports = {
   Query: {
@@ -18,16 +17,12 @@ module.exports = {
         throw new Error("dm does not exist");
       }
       //* if the logged user isn't a part of the dm throw an error
-      if (dm.messengers.indexOf(username) < 1) {
+      if (dm.messengers.indexOf(username) < 0) {
         throw new Error("you are not a part of this dm");
       }
-      //* if the dm is hidden throw an error
-      if (dm.hidden) {
-        throw new Error("the dm is hidden");
-      }
       //* fetch and return dm messages
-      return (await Message.find({ dmID }))
-      .map(msg => ({
+      const result = await Message.find({ dmID });
+      return result.reverse().map((msg) => ({
         ...msg._doc,
         messageID: msg._id,
       }));
@@ -36,15 +31,14 @@ module.exports = {
       //* Check if the user has the right to get the messages or not
       const { username } = checkAuth(context);
       //* get, filter and return dms
-      const dms = await DM.find((dm) => dm.messengers.indexOf(username) > 0);
-      return dms.map((dm) => {
-        if (!dm.hidden) {
-          return {
-            ...dm._doc,
-            dmID: dm._id,
-          };
-        }
-      });
+      const dms = await DM.find();
+      dms.filter(
+        (dm) => dm.messengers.indexOf(username) > 0
+      );
+      return dms.reverse().map((dm) => ({
+        ...dm._doc,
+        dmID: dm._id,
+      }));
     },
   },
   Mutation: {
@@ -57,10 +51,9 @@ module.exports = {
       } = args;
       //* if the dm doesn't exist throw an error
       const dm = await DM.findById(dmID);
-      if (!dm) {
-        throw new Error("dm does not exist");
-      }
-      //* create and save the new message
+      if (!dm) throw new Error("dm does not exist");
+      // TODO: make sure that the logged user is a messenger in this dm
+      //* create, save and return the new message
       const newMessage = new Message({
         dmID,
         username,
@@ -68,13 +61,6 @@ module.exports = {
         sentAt: new Date().toISOString(),
       });
       const result = await newMessage.save();
-      //* mark the new message as the last sent in the dm
-      dm.lastMessage = {
-        ...result._doc,
-        messageID: result._id
-      }
-      await DM.updateOne({ dmID }, dm);
-      //* return the new created message
       return {
         ...result._doc,
         messageID: result._id,
@@ -88,26 +74,26 @@ module.exports = {
       //* if the message doesn't exist throw an error
       const message = await Message.findById(messageID);
       if (!message) {
-        throw new Error('message does not exist');
+        throw new Error("message does not exist");
       }
       //* if the dm of the message doesn't exist throw an error
       const dm = await DM.findById(message.dmID);
       if (!dm) {
-        throw new Error('the dm does not exist');
+        throw new Error("the dm does not exist");
       }
       //* if the sender of the message isn't the logged user throw an error
       if (message.username !== username) {
-        throw new Error('you are not the owner of the message');
+        throw new Error("you are not the owner of the message");
       }
       //* remove the message
       await message.remove();
       //* set the previous message as the last sent in the dm
-      const prevMessage = await Message.find().limit(1);
-      //! the resent message is at the top
+      const prevMessage = await Message.findOne().sort("-created_at");
+      //! the resent message is at the bottom, so reverse the result
       dm.lastMessage = {
         ...prevMessage._doc,
-        messageID: prevMessage._id
-      }
+        messageID: prevMessage._id,
+      };
       await DM.updateOne({ dmID }, dm);
       //* return the deleted message id
       return message._id;
@@ -120,22 +106,23 @@ module.exports = {
       //* if the dm doesn't exist throw an error
       const dm = await DM.findById(dmID);
       if (!dm) {
-        throw new Error('dm does not exist');
+        throw new Error("dm does not exist");
       }
       //* if the logged user isn't a part of the dm throw an error
-      if (dm.messengers.indexOf(username) < 1) {
-        throw new Error('you are not a part of this dm');
+      if (dm.messengers.indexOf(username) < 0) {
+        throw new Error("you are not a part of this dm");
       }
       //* if the count of the messengers is 2 remove the whole dm
       if (dm.messengers.length === 2) {
         //* remove the dm
-        await dm.remove();
+        await DM.remove({ _id: dmID });
         //* remove dm messages
         await Message.remove({ dmID });
       } else {
         //* else remove the logged user from messengers list
-        dm.messengers.filter(messenger => messenger !== username);
-        await dm.update();
+        dm.messengers.filter((messenger) => messenger !== username);
+        await DM.updateOne({ _id: dmID }, dm);
+        console.log(username, dm.messengers);
         //* remove the logged user messages from the dm
         await Message.remove({ dmID, username });
       }
@@ -147,21 +134,25 @@ module.exports = {
       //* Check if the user has the right to create a dm or not
       const { username } = checkAuth(context);
       const { messengers } = args;
+      // TODO: check if messengers exist or not
       //* if a dm with the same messengers exit, throw an error
-      const dmAlreadyExist = await DM.find(dm => dm.messengers.sort() === messengers.sort());
+      const dms = await DM.find();
+      const dmAlreadyExist = dms.find(
+        (dm) => dm.messengers.sort() === messengers.sort()
+      );
       if (dmAlreadyExist) {
-        throw new Error('dm already exist');
+        throw new Error("dm already exist");
       }
       //* create, save and return the new dm
       const newDM = new DM({
         messengers,
-        startedDMSince: new Date().toISOString()
+        startedDMSince: new Date().toISOString(),
       });
       const result = await newDM.save();
       return {
         ...result._doc,
-        dmID: result._id
-      }
-    }
+        dmID: result._id,
+      };
+    },
   },
 };

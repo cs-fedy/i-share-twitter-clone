@@ -5,7 +5,6 @@ const { UserInputError } = require("apollo-server");
 //* Models
 const User = require("../../models/users");
 const Follow = require("../../models/follows");
-const Block = require("../../models/blocks");
 const DM = require("../../models/directMessages");
 const Comment = require("../../models/comments");
 const React = require("../../models/reacts");
@@ -35,8 +34,8 @@ module.exports = {
       }
       //* else return the target user
       return {
-        ...res._doc,
-        userID: res._id,
+        ...user._doc,
+        userID: user._id,
       };
     },
   },
@@ -66,13 +65,9 @@ module.exports = {
         throw new UserInputError("Wrong credentials", { errors });
       }
       //* sign a new jwt and return the logged user
-      const token = await jwt.sign(
-        { userID: user.userID, username },
-        jwtSecret,
-        {
-          expiresIn: "1h",
-        }
-      );
+      const token = await jwt.sign({ userID: user._id, username }, jwtSecret, {
+        expiresIn: "2h",
+      });
       return {
         ...user._doc,
         userID: user._id,
@@ -81,7 +76,6 @@ module.exports = {
     },
     //* SIGNUP: register a new user
     async signup(parent, args, context, info) {
-      checkAuth(context);
       const {
         signupInput: { email, username, password, confirmPassword },
       } = args;
@@ -114,7 +108,7 @@ module.exports = {
       const res = await newUser.save();
       //* sign a new jwt and return the new user
       const token = await jwt.sign({ userID: res._id, username }, jwtSecret, {
-        expiresIn: "1h",
+        expiresIn: "2h",
       });
       return {
         ...res._doc,
@@ -123,16 +117,16 @@ module.exports = {
       };
     },
     //* DELETE_ACCOUNT: delete user account
+    // TODO: refactor and test deleteAccount
     async deleteAccount(parent, args, context, info) {
       //* check if user has the right to delete his own account or not
       const { userID } = checkAuth(context);
       const { username } = await User.findById(userID);
-      //* remove the user from 'follow', 'block', 'comment', 'react', 'post', 'message', 'dm' and 'bookmark' list
+      if (!username)
+        throw new Error("user does not exist");
+      //* remove the user from 'follow', 'comment', 'react', 'post', 'message', 'dm' and 'bookmark' list
       await Follow.remove(
         ({ follower, following }) => [follower, following].indexOf(username) > 0
-      );
-      await Block.remove(
-        ({ blocker, blocking }) => [blocker, blocking].indexOf(username) > 0
       );
       await Comment.remove({ commentedBy: username });
       await React.remove({ reactedBy: username });
@@ -169,22 +163,24 @@ module.exports = {
         //* remove and return the follow if it exist
         await follow.remove();
         return {
-          ...result._doc,
-          followID: result._id,
+          ...follow._doc,
+          followID: follow._id,
         };
       } else {
-        //* if no dm between the two messengers exit create new one
-        const dmAlreadyExist = await DM.find(
+        //* if no dm between the two messengers, create new one
+        const messengers = [targetUsername, username];
+        const dmAlreadyExist = await DM.find();
+        dmAlreadyExist.filter(
           (dm) => dm.messengers.sort() === messengers.sort()
         );
-        if (!dmAlreadyExist) {
+        if (dmAlreadyExist.length === 0) {
           const newDM = new DM({
             messengers,
             startedDMSince: new Date().toISOString(),
           });
           await newDM.save();
         }
-        //* else create a new follow
+        //* else create and return the new follow
         const newFollow = new Follow({
           follower: username,
           following: targetUsername,
@@ -194,42 +190,6 @@ module.exports = {
         return {
           ...result._doc,
           followID: result._id,
-        };
-      }
-    },
-    //* TOGGLE_BLOCK: if the user is blocking the target user remove the block and reveal the hidden items, else create a new block and hide revealed items
-    async toggleBlock(parent, args, context, info) {
-      //* check if user has the right to toggle block or not
-      const { username } = checkAuth(context);
-      const { targetUsername } = args;
-      //* get the block from the db
-      const block = await Block.findOne({
-        blocker: username,
-        blocking: targetUsername,
-      });
-      if (block) {
-        // TODO: reveal reacts, comments and dm --> (username, targetUsername)
-        //* remove and return the block if it exist
-        await block.remove();
-        return {
-          ...result._doc,
-          blockID: result._id,
-        };
-      } else {
-        // TODO: hide reacts, comments and dm --> (username, targetUsername)
-        //* remove the follow from each user if exist
-        await Follow.remove({ follower: username, following: targetUsername });
-        await Follow.remove({ follower: targetUsername, following: username });
-        //* create, save and return the block
-        const newBlock = new Block({
-          blocker: username,
-          blocking: targetUsername,
-          blockedAt: new Date().toISOString(),
-        });
-        const result = await newBlock.save();
-        return {
-          ...result._doc,
-          blockID: result._id,
         };
       }
     },

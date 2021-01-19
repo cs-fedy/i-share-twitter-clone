@@ -14,6 +14,10 @@ module.exports = gql`
     profilePictURL: String
     country: String
     birthDate: String
+    userPosts: [post]!
+    userBookmarks: [bookmark]!
+    userFollowings: [follow]!
+    userFollowers: [follow]!
   }
 
   type follow {
@@ -23,13 +27,6 @@ module.exports = gql`
     followedAt: String!
   }
 
-  type block {
-    blockID: ID!
-    blocker: String!
-    blocking: String!
-    blockedAt: String!
-  }
-
   type comment {  
     commentID: ID!
     postID: ID!
@@ -37,7 +34,6 @@ module.exports = gql`
     commentBody: String!
     commentedAt: String!
     commentUpdatedAt: String
-    hidden: Boolean
   }
 
   type react {
@@ -46,7 +42,6 @@ module.exports = gql`
     reactedBy: String!
     reactType: String!
     reactedAt: String!
-    hidden: Boolean
   }
 
   type post {
@@ -55,8 +50,9 @@ module.exports = gql`
     postBody: String!
     postedAt: String!
     postUpdatedAt: String
-    commentsCount: Number!
-    reactsCount: Number!
+    originalPostID: ID
+    postReacts: [react]!
+    postComments: [comment]!
   }
 
   type message {
@@ -72,7 +68,6 @@ module.exports = gql`
     messengers: [String]!
     lastMessage: message
     startedDMSince: String!
-    hidden: Boolean
   }
 
   type bookmark {
@@ -80,6 +75,11 @@ module.exports = gql`
     username: String!
     postID: ID!
     bookmarkedAt: String!
+  }
+
+  input GetFollowInput {
+    username: String
+    type: String!
   }
 
   input LoginInput {
@@ -120,10 +120,9 @@ module.exports = gql`
   }
 
   type Query {
-    getUser(userID: ID!): user!
-    getPosts(userID: ID): [post]!
+    getUser(userID: ID): user!
+    getPosts: [post]!
     getPost(postID: ID!): post!
-    getBookmarks:[bookmark]!
     getMessages(dmID: ID!): [message]!
     getDMs: [dm]!
   }
@@ -133,7 +132,6 @@ module.exports = gql`
     signup(signupInput: SignupInput): user!
     deleteAccount: ID!
     toggleFollow(targetUsername: String!): follow!
-    toggleBlock(targetUsername: String!): block!
     createPost(postBody: String!): post!
     updatePost(updatePostInput: UpdatePostInput): post!
     deletePost(postID: ID!): ID!
@@ -141,6 +139,7 @@ module.exports = gql`
     comment(commentInput: CommentInput): comment!
     updateComment(updateCommentInput: UpdateCommentInput): comment!
     deleteComment(commentID: ID!): ID!
+    sharePost(postID: ID!): post!
     toggleBookmark(postID: ID!): bookmark!
     createMessage(messageInput: MessageInput): message!
     deleteMessage(messageID: ID!): ID!

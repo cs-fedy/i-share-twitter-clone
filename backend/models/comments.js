@@ -5,11 +5,7 @@ const commentSchema = new Schema({
     commentedBy: String,
     commentBody: String,
     commentedAt: String,
-    commentUpdatedAt: String,
-    hidden: {
-        type: Boolean,
-        default: false
-    }
+    commentUpdatedAt: String
 });
 
 module.exports = model('comment', commentSchema);

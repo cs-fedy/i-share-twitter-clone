@@ -6,10 +6,6 @@ const reactSchema = new Schema({
     reactBody: String,
     reactType: String,
     reactedAt: String,
-    hidden: {
-        type: Boolean,
-        default: false
-    }
 });
 
 module.exports = model('react', reactSchema);
