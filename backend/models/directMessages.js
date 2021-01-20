@@ -1,11 +1,12 @@
 const { Schema, model } = require("mongoose");
 
 const dmSchema = new Schema({
-  messengers: [String],
+  messengerOne: String,
+  messengerTwo: String,
   startedDMSince: String,
-  hidden: {
-      type: Boolean,
-      default: false
+  lastMessage: {
+    type: Schema.Types.ObjectId,
+    ref: 'message'
   }
 });
 

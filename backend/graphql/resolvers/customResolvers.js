@@ -4,6 +4,7 @@ const Bookmark = require("../../models/bookmarks");
 const Follow = require("../../models/bookmarks");
 const React = require("../../models/reacts");
 const Comment = require("../../models/comments");
+const Message = require("../../models/messages");
 
 module.exports = {
   user: {
@@ -48,4 +49,14 @@ module.exports = {
         .map((comment) => ({ ...comment._doc, commentID: comment._id }));
     },
   },
+  dm: {
+    lastMessage: async (parent) => {
+      const messages = await Message.find({ dmID: parent.dmID });
+      const lastMessage = messages[messages.length -1];
+      return {
+        ...lastMessage._doc,
+        messageID: lastMessage._id
+      }
+    }
+  }
 };

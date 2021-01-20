@@ -17,7 +17,8 @@ module.exports = {
         throw new Error("dm does not exist");
       }
       //* if the logged user isn't a part of the dm throw an error
-      if (dm.messengers.indexOf(username) < 0) {
+      const messengers = [dm.messengerOne, dm.messengerTwo];
+      if (messengers.indexOf(username) < 0) {
         throw new Error("you are not a part of this dm");
       }
       //* fetch and return dm messages
@@ -33,7 +34,8 @@ module.exports = {
       //* get, filter and return dms
       const dms = await DM.find();
       dms.filter(
-        (dm) => dm.messengers.indexOf(username) > 0
+        ({ messengerOne, messengerTwo }) =>
+          [messengerOne, messengerTwo].indexOf(username) > 0
       );
       return dms.reverse().map((dm) => ({
         ...dm._doc,
@@ -52,7 +54,11 @@ module.exports = {
       //* if the dm doesn't exist throw an error
       const dm = await DM.findById(dmID);
       if (!dm) throw new Error("dm does not exist");
-      // TODO: make sure that the logged user is a messenger in this dm
+      //* if the logged user isn't a messenger in the dm throw an error
+      const messengers = [dm.messengerOne, dm.messengerTwo];
+      if (messengers.indexOf(username) < 0) {
+        throw new Error("you are not a part of this dm");
+      }
       //* create, save and return the new message
       const newMessage = new Message({
         dmID,
@@ -90,11 +96,6 @@ module.exports = {
       //* set the previous message as the last sent in the dm
       const prevMessage = await Message.findOne().sort("-created_at");
       //! the resent message is at the bottom, so reverse the result
-      dm.lastMessage = {
-        ...prevMessage._doc,
-        messageID: prevMessage._id,
-      };
-      await DM.updateOne({ dmID }, dm);
       //* return the deleted message id
       return message._id;
     },
@@ -109,23 +110,14 @@ module.exports = {
         throw new Error("dm does not exist");
       }
       //* if the logged user isn't a part of the dm throw an error
-      if (dm.messengers.indexOf(username) < 0) {
+      const messengers = [dm.messengerOne, dm.messengerTwo];
+      if (messengers.indexOf(username) < 0) {
         throw new Error("you are not a part of this dm");
       }
-      //* if the count of the messengers is 2 remove the whole dm
-      if (dm.messengers.length === 2) {
-        //* remove the dm
-        await DM.remove({ _id: dmID });
-        //* remove dm messages
-        await Message.remove({ dmID });
-      } else {
-        //* else remove the logged user from messengers list
-        dm.messengers.filter((messenger) => messenger !== username);
-        await DM.updateOne({ _id: dmID }, dm);
-        console.log(username, dm.messengers);
-        //* remove the logged user messages from the dm
-        await Message.remove({ dmID, username });
-      }
+      //* remove the dm
+      await DM.remove({ _id: dmID });
+      //* remove dm messages
+      await Message.remove({ dmID });
       //* return the dm id
       return dmID;
     },
@@ -138,7 +130,7 @@ module.exports = {
       //* if a dm with the same messengers exit, throw an error
       const dms = await DM.find();
       const dmAlreadyExist = dms.find(
-        (dm) => dm.messengers.sort() === messengers.sort()
+        ({messengerOne, messengerTwo}) => [messengerOne, messengerTwo].sort() === messengers.sort()
       );
       if (dmAlreadyExist) {
         throw new Error("dm already exist");

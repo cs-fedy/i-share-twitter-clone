@@ -65,9 +65,10 @@ module.exports = gql`
 
   type dm {
     dmID: ID!
-    messengers: [String]!
-    lastMessage: message
+    messengerOne: String!
+    messengerTwo: String!
     startedDMSince: String!
+    lastMessage: message
   }
 
   type bookmark {
@@ -130,7 +131,6 @@ module.exports = gql`
   type Mutation {
     login(loginInput: LoginInput): user!
     signup(signupInput: SignupInput): user!
-    deleteAccount: ID!
     toggleFollow(targetUsername: String!): follow!
     createPost(postBody: String!): post!
     updatePost(updatePostInput: UpdatePostInput): post!

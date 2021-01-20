@@ -8,6 +8,7 @@ const React = require("../../models/reacts");
 const Comment = require("../../models/comments");
 //* utils
 const checkAuth = require("../../util/checkAuth");
+const { user } = require("./customResolvers");
 module.exports = {
   Query: {
     //* GET_POSTS: get the posts of user followings(logged user is included): home screen posts
@@ -28,9 +29,9 @@ module.exports = {
         .flat()
         .reverse()
         .map((post) => ({
-        ...post._doc,
-        postID: post._id,
-      }));
+          ...post._doc,
+          postID: post._id,
+        }));
     },
     //* GET_POST: if the account of the owner of the post is public or followed by logged user return the post
     async getPost(parent, args, context, info) {
@@ -39,8 +40,7 @@ module.exports = {
       const { postID } = args;
       //* if the post doesn't exist throw an error
       const post = await Post.findById(postID);
-      if (!post)
-        throw new Error("post does not exist");
+      if (!post) throw new Error("post does not exist");
       //* if target user is logged user return the post
       if (username === post.username) {
         return {
@@ -118,10 +118,11 @@ module.exports = {
         { _id: postID },
         {
           postBody: newPostBody,
+          postUpdatedAt: new Date().toISOString()
         }
       );
       return {
-        ...post._doc,
+        ...res._doc,
         postID,
       };
     },
@@ -141,6 +142,9 @@ module.exports = {
           "you do not have any fucking right to delete this post idiot"
         );
       }
+      //* remove post reacts and comments
+      await React.remove({ postID });
+      await Comment.remove({ postID });
       //* remove and return the post
       await Post.remove({ _id: postID });
       return postID;
@@ -217,6 +221,7 @@ module.exports = {
       }
       //* update and return the comment
       comment.commentBody = newCommentBody;
+      comment.commentUpdatedAt = new Date().toISOString();
       await Comment.updateOne({ _id: commentID }, comment);
       return {
         ...comment._doc,
@@ -251,7 +256,17 @@ module.exports = {
       if (!post) {
         throw new Error("post does not exist");
       }
-      // TODO: check if the user is restricted to share the post or not
+      //* if the target user isn't the logged user do:
+      const targetUser = await User.findOne({ username: post.username });
+      if (targetUser.username !== username) {
+        //* throw an error if the logged user is restricted to share the post
+        const isFollower = await Follow.findOne({
+          follower: username,
+          following: targetUser.username,
+        });
+        if (!isFollower && targetUser.accountType === "private")
+          throw new Error("follow first to share the post");
+      }
       //* create, save and return the shared post
       const newPost = new Post({
         username,
