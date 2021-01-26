@@ -1,62 +1,61 @@
-import React, { createContext, useReducer } from "react";
+import React, { createContext, useState } from "react";
 import jwtDecode from "jwt-decode";
 
-const initialState = {
-    user: null
+let initialState = {
+  user: null,
+  isUserLogged: false,
 };
 
 const token = localStorage.getItem("JWT_TOKEN");
 if (token) {
-    const decodedToken = jwtDecode(token);
-    if (decodedToken.exp * 1000 < Date.now()) {
-        localStorage.removeItem("JWT_TOKEN");
-    } else {
-        initialState.user = decodedToken;
-    }
+  const decodedToken = jwtDecode(token);
+  if (decodedToken.exp * 1000 < Date.now()) {
+    localStorage.removeItem("JWT_TOKEN");
+  } else {
+    initialState = {
+      user: decodedToken,
+      isUserLogged: true,
+    };
+  }
 }
 
 const AuthContext = createContext({
   user: null,
   login: (data) => {},
   logout: () => {},
+  isUserLogged: false,
 });
 
-const authReducer = (state, action) => {
-  switch (action.type) {
-    case "LOGIN":
-      return {
-        ...state,
-        user: action.payload,
-      };
-    case "LOGOUT":
-      return {
-        ...state,
-        user: null,
-      };
-    default:
-      return state;
-  }
-};
-
 const AuthProvider = (props) => {
-  const [state, dispatch] = useReducer(authReducer, initialState);
+  const [authDetails, setAuthDetails] = useState(initialState);
+
   const login = (data) => {
     localStorage.setItem("JWT_TOKEN", data.token);
-    dispatch({
-      type: "LOGIN",
-      payload: data,
-    });
+    setAuthDetails((prevState) => ({
+      ...prevState,
+      user: data,
+      isUserLogged: true,
+    }));
   };
 
   const logout = () => {
     localStorage.removeItem("JWT_TOKEN");
-    dispatch({
-        type: "LOGOUT",
-    });
+    setAuthDetails((prevState) => ({
+      ...prevState,
+      isUserLogged: false,
+      user: null,
+    }));
   };
 
   return (
-    <AuthContext.Provider value={{ login, logout, user: state.user }}>
+    <AuthContext.Provider
+      value={{
+        login,
+        logout,
+        user: authDetails.user,
+        isUserLogged: authDetails.isUserLogged,
+      }}
+    >
       {props.children}
     </AuthContext.Provider>
   );
