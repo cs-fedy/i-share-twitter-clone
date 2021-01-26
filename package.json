@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "apollo-link-context": "^1.0.20"
+  }
+}
