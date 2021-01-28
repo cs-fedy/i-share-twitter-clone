@@ -16,7 +16,6 @@ const Input = (props) => {
         id={id}
         name={name}
         type={type}
-        error={error? true: false}
       />
       {error && (
         <p className="text-red-500 text-xs italic">{error}</p>

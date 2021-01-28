@@ -1,8 +1,9 @@
 import { useState, useContext } from "react";
 import Input from "../components/Input";
 import { Link } from "react-router-dom";
-import { useMutation, gql } from "@apollo/client";
+import { useMutation } from "@apollo/client";
 import { AuthContext } from "../context/AuthContext";
+import LOG_USER from "../graphql/login";
 
 const Login = (props) => {
   const context = useContext(AuthContext);
@@ -74,15 +75,5 @@ const Login = (props) => {
     </div>
   );
 };
-
-const LOG_USER = gql`
-  mutation login($username: String!, $password: String!) {
-    login(loginInput: { username: $username, password: $password }) {
-      userID
-      username
-      token
-    }
-  }
-`;
 
 export default Login;

@@ -1,27 +1,30 @@
 import React, { useContext } from "react";
-import { Link } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
+import CustomLink from "./CustomLink";
 
-const Navbar = (props) => {
+const Navbar = () => {
   const { user, logout } = useContext(AuthContext);
+  const history = useHistory();
   const handleClick = () => {
-    // TODO: fix logging out issues
-    // props.history.push("/login");
+    history.push("/login");
     logout();
   };
 
   return (
-    <nav className="flex flex-wrap items-center justify-between p-5 bg-blue-200">
-      <Link to="/">I-share</Link>
-      <div>
-        <Link to="/user/:userID" className="mr-4">
+    <div className="bg-blue-100 flex justify-center mb-5">
+    <nav className="flex flex-wrap items-center justify-between p-5 md:container">
+      <CustomLink to="/">I-share</CustomLink>
+      <div className="flex gap-4">
+        <CustomLink to="/user/:userID">
           {user.username}
-        </Link>
-        <Link to="#" role="button" onClick={handleClick}>
+        </CustomLink>
+        <CustomLink to="#" role="button" onClick={handleClick}>
           logout
-        </Link>
+        </CustomLink>
       </div>
     </nav>
+    </div>
   );
 };
 

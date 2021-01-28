@@ -1,8 +1,9 @@
 import { useState, useContext } from "react";
 import Input from "../components/Input";
 import { Link } from "react-router-dom";
-import { useMutation, gql } from "@apollo/client";
+import { useMutation } from "@apollo/client";
 import { AuthContext } from "../context/AuthContext";
+import REGISTER_USER from "../graphql/signup";
 
 const Signup = (props) => {
   const context = useContext(AuthContext);
@@ -94,27 +95,5 @@ const Signup = (props) => {
     </div>
   );
 };
-
-const REGISTER_USER = gql`
-  mutation signup(
-    $email: String!
-    $username: String!
-    $password: String!
-    $confirmPassword: String!
-  ) {
-    signup(
-      signupInput: {
-        email: $email
-        username: $username
-        password: $password
-        confirmPassword: $confirmPassword
-      }
-    ) {
-      userID
-      username
-      token
-    }
-  }
-`;
 
 export default Signup;
