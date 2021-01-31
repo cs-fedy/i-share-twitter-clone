@@ -77,17 +77,19 @@ module.exports = {
           errors: { post: "post body must not be empty" },
         });
       }
-      //* create, save and return the new post
+      //* create, save, publish and return the new post
       const newPost = new Post({
         username,
         postBody,
         postedAt: new Date().toISOString(),
       });
       const res = await newPost.save();
-      return {
+      const returnedPost = {
         ...res._doc,
         postID: res._id,
       };
+      context.pubsub.publish("POST_ADDED", returnedPost);
+      return returnedPost;
     },
     //* UPDATE_POST: update the post if it belongs to the logged user
     async updatePost(parent, args, context, info) {
@@ -118,7 +120,7 @@ module.exports = {
         { _id: postID },
         {
           postBody: newPostBody,
-          postUpdatedAt: new Date().toISOString()
+          postUpdatedAt: new Date().toISOString(),
         }
       );
       return {

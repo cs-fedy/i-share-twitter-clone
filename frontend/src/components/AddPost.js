@@ -27,8 +27,12 @@ const AddPost = (props) => {
         const { getPosts: feed } = cache.readQuery({
           query: FEED_QUERY,
         });
-        const newFeed = [...feed, result.data.createPost];
-        console.log(newFeed);
+        const newPost = result.data.createPost;
+        const exists = feed.find(({ postID }) => postID === newPost.postID);
+        let newFeed = feed;
+        if (!exists) {
+          newFeed = [...feed, newPost];
+        }
         cache.writeQuery({
           query: FEED_QUERY,
           data: {

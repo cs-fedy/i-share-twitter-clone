@@ -4,7 +4,7 @@ import { AuthContext } from "../context/AuthContext";
 import AddPost from "../components/AddPost";
 import FeedPosts from "../components/FeedPosts";
 
-const Home = () => {
+const Home = (props) => {
   const { isUserLogged } = useContext(AuthContext);
   if (isUserLogged) {
     return (

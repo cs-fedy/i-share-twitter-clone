@@ -3,7 +3,7 @@ const postResolvers = require("./post");
 const bookmarkResolvers = require("./bookmark");
 const dmResolvers = require("./directMessage");
 const customResolvers = require("./customResolvers");
-
+const subscriptionResolvers = require("./subscriptionResolvers");
 module.exports = {
   Query: {
     ...userResolvers.Query,
@@ -16,6 +16,10 @@ module.exports = {
     ...postResolvers.Mutation,
     ...bookmarkResolvers.Mutation,
     ...dmResolvers.Mutation,
+  },
+
+  Subscription: {
+    ...subscriptionResolvers,
   },
 
   ...customResolvers,

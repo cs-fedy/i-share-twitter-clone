@@ -146,4 +146,8 @@ module.exports = gql`
     deleteDM(dmID: ID!): ID!
     createDM(messengers: [String]!): dm!
   }
+
+  type Subscription {
+    postAdded: post!
+  }
 `;
