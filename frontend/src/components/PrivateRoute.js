@@ -1,13 +1,29 @@
-import React, { useContext } from 'react';
-import { Route, Redirect } from 'react-router-dom';
-import { AuthContext } from '../context/AuthContext';
+import React, { useContext } from "react";
+import { Route, Redirect } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext";
 
-const PrivateRoute = (props) => {
-    const { component: Component, ...res } = props;
-    const { isUserLogged } = useContext(AuthContext);
-    return <Route {...res} render={
-        props => isUserLogged? <Redirect to="/" />: <Component {...props} />
-    } />
-}
+export const LoggedRoutes = (props) => {
+  const { component: Component, ...res } = props;
+  const { isUserLogged } = useContext(AuthContext);
+  return (
+    <Route
+      {...res}
+      render={(props) =>
+        isUserLogged ? <Component {...props} /> : <Redirect to="/login" />
+      }
+    />
+  );
+};
 
-export default PrivateRoute;
+export const NotLoggedRoutes = (props) => {
+  const { component: Component, ...res } = props;
+  const { isUserLogged } = useContext(AuthContext);
+  return (
+    <Route
+      {...res}
+      render={(props) =>
+        !isUserLogged ? <Component {...props} /> : <Redirect to="/" />
+      }
+    />
+  );
+};
