@@ -3,7 +3,7 @@ import { useMutation } from "@apollo/client";
 import ADD_POST from "../graphql/addPost";
 import FEED_QUERY from "../graphql/feedQuery";
 
-const AddPost = (props) => {
+const AddPost = () => {
   const [postData, setPostData] = useState({
     value: "",
     error: "",
@@ -11,6 +11,7 @@ const AddPost = (props) => {
 
   const [addPost] = useMutation(ADD_POST, {
     onError(err) {
+      console.log(err);
       setPostData({
         ...postData,
         error: err.graphQLErrors[0].extensions.exception.errors.post,
@@ -47,26 +48,41 @@ const AddPost = (props) => {
     setPostData({ ...postData, value: element.target.value });
   };
 
+  const handleCancel = (event) => {
+    event.preventDefault();
+    setPostData({ value: "", error: "" });
+  };
+
   return (
-    <div className="w-screen items-center justify-center flex">
+    <div>
       <form
-        className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 w-96"
+        className="editor mx-auto w-10/12 flex flex-col text-gray-800 border border-gray-300 p-4 shadow-lg max-w-2xl"
         onSubmit={handleSubmit}
-        noValidate
       >
         <textarea
+          className="description bg-gray-100 sec p-3 h-60 border border-gray-300 outline-none mb-3"
+          placeholder="Describe everything about this post here"
           onChange={handleChange}
-          className="form-textarea mt-1 block w-full mb-1"
           value={postData.value}
-          rows="3"
-          placeholder="Your post here..."
         ></textarea>
         {postData.error && (
           <p className="text-red-500 text-xs italic mb-1">{postData.error}</p>
         )}
-        <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 mr-2 rounded focus:outline-none focus:shadow-outline">
-          Add post
-        </button>
+        <div className="buttons flex">
+          <button
+            type="button"
+            onClick={handleCancel}
+            className="btn border border-gray-300 p-1 px-4 font-semibold cursor-pointer text-gray-500 ml-auto"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            className="btn border border-indigo-500 p-1 px-4 font-semibold cursor-pointer text-gray-200 ml-2 bg-indigo-500"
+          >
+            Post
+          </button>
+        </div>
       </form>
     </div>
   );

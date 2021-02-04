@@ -9,6 +9,12 @@ const FEED_QUERY = gql`
       postedAt
       postUpdatedAt
       originalPostID
+      postReacts {
+        reactID
+      }
+      postComments {
+        commentID
+      }
     }
   }
 `;
