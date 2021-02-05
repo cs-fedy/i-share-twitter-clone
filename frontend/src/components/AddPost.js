@@ -11,7 +11,6 @@ const AddPost = () => {
 
   const [addPost] = useMutation(ADD_POST, {
     onError(err) {
-      console.log(err);
       setPostData({
         ...postData,
         error: err.graphQLErrors[0].extensions.exception.errors.post,

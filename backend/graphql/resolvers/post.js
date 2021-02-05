@@ -124,7 +124,8 @@ module.exports = {
         }
       );
       return {
-        ...res._doc,
+        ...post._doc,
+        postBody: newPostBody,
         postID,
       };
     },
