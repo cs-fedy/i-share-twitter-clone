@@ -4,6 +4,7 @@ import { AuthContext } from "../context/AuthContext";
 import { useMutation } from "@apollo/client";
 import DELETE_POST from "../graphql/deletePost";
 import FEED_QUERY from "../graphql/feedQuery";
+import { useHistory } from "react-router-dom";
 
 const ReactionBar = ({
   postReacts,
@@ -11,9 +12,11 @@ const ReactionBar = ({
   postComments,
   postID,
   postBody,
+  isPostPage,
 }) => {
   const [hidden, setHidden] = useState(true);
   const { user: loggedUser } = useContext(AuthContext);
+  const history = useHistory();
 
   const toggleHidden = () => {
     setHidden(!hidden);
@@ -36,6 +39,9 @@ const ReactionBar = ({
         });
       },
     });
+    if (isPostPage) {
+      history.push("/");
+    }
   };
 
   return (
@@ -60,8 +66,9 @@ const ReactionBar = ({
                 </div>
                 <div className="inline-flex rounded-md shadow">
                   <button
-                  onClick={removePost}
-                   className="inline-flex items-center justify-center px-1 py-1 border border-transparent text-base font-medium rounded-md text-white bg-red-700 hover:bg-red-600">
+                    onClick={removePost}
+                    className="inline-flex items-center justify-center px-1 py-1 border border-transparent text-base font-medium rounded-md text-white bg-red-700 hover:bg-red-600"
+                  >
                     <i className="fas fa-trash-alt"></i>
                   </button>
                 </div>
@@ -80,6 +87,7 @@ const ReactionBar = ({
           toggleHidden={toggleHidden}
           postID={postID}
           postBody={postBody}
+          isPostPage={isPostPage}
         />
       )}
     </>

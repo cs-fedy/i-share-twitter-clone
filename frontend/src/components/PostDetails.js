@@ -24,8 +24,8 @@ const PostDetails = ({
             </span>
             <span className="block text-sm text-gray-500 dark:text-gray-400 font-light leading-snug">
               {postUpdatedAt
-                ? moment(postUpdatedAt).format("DD/MM/YYYY")
-                : moment(postedAt).format("DD/MM/YYYY")}
+                ? moment(postUpdatedAt).fromNow()
+                : moment(postedAt).fromNow()}
             </span>
           </div>
         </div>

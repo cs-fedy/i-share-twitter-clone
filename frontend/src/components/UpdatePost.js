@@ -2,8 +2,9 @@ import { useState } from "react";
 import { useMutation } from "@apollo/client";
 import UPDATE_POST from "../graphql/updatePost";
 import FEED_QUERY from "../graphql/feedQuery";
+import GET_POST from "../graphql/getPost";
 
-const UpdatePost = ({ toggleHidden, postID, postBody }) => {
+const UpdatePost = ({ toggleHidden, postID, postBody, isPostPage }) => {
   const [postData, setPostData] = useState({
     value: postBody,
     error: "",
@@ -27,23 +28,43 @@ const UpdatePost = ({ toggleHidden, postID, postBody }) => {
     updatePost({
       variables: { postID, newPostBody: postData.value },
       update(cache, result) {
-        const { getPosts: feed } = cache.readQuery({
-          query: FEED_QUERY,
-        });
-        const newFeed = feed.map((post) => {
-          if (post.postID === postID) {
-            const { postBody, updatedAt } = result.data.updatePost;
-            return { ...post, postBody, updatedAt };
-          }
-          return post;
-        });
+        if (isPostPage) {
+          const { getPost } = cache.readQuery({
+            query: GET_POST,
+            variables: { postID },
+          });
+          const newPost = {
+            ...getPost,
+            postBody: result.data.updatePost.postBody,
+            postUpdatedAt: new Date().toISOString(),
+          };
 
-        cache.writeQuery({
-          query: FEED_QUERY,
-          data: {
-            getPosts: newFeed,
-          },
-        });
+          cache.writeQuery({
+            query: GET_POST,
+            variables: { postID },
+            data: {
+              getPost: newPost,
+            },
+          });
+        } else {
+          const { getPosts: feed } = cache.readQuery({
+            query: FEED_QUERY,
+          });
+          const newFeed = feed.map((post) => {
+            if (post.postID === postID) {
+              const { postBody, updatedAt } = result.data.updatePost;
+              return { ...post, postBody, updatedAt };
+            }
+            return post;
+          });
+
+          cache.writeQuery({
+            query: FEED_QUERY,
+            data: {
+              getPosts: newFeed,
+            },
+          });
+        }
       },
     });
     toggleHidden();

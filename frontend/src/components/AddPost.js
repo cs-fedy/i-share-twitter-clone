@@ -1,7 +1,6 @@
 import { React, useState } from "react";
 import { useMutation } from "@apollo/client";
 import ADD_POST from "../graphql/addPost";
-import FEED_QUERY from "../graphql/feedQuery";
 
 const AddPost = () => {
   const [postData, setPostData] = useState({
@@ -10,6 +9,7 @@ const AddPost = () => {
   });
 
   const [addPost] = useMutation(ADD_POST, {
+    variables: { postBody: postData.value },
     onError(err) {
       setPostData({
         ...postData,
@@ -20,27 +20,7 @@ const AddPost = () => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    addPost({
-      variables: { postBody: postData.value },
-      update(cache, result) {
-        setPostData({ ...postData, value: "" });
-        const { getPosts: feed } = cache.readQuery({
-          query: FEED_QUERY,
-        });
-        const newPost = result.data.createPost;
-        const exists = feed.find(({ postID }) => postID === newPost.postID);
-        let newFeed = feed;
-        if (!exists) {
-          newFeed = [...feed, newPost];
-        }
-        cache.writeQuery({
-          query: FEED_QUERY,
-          data: {
-            getPosts: newFeed,
-          },
-        });
-      },
-    });
+    addPost();
   };
 
   const handleChange = (element) => {
