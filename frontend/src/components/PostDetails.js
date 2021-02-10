@@ -1,14 +1,8 @@
 import moment from "moment";
 import { Link } from "react-router-dom";
 
-const PostDetails = ({
-  username,
-  postUpdatedAt,
-  postedAt,
-  postBody,
-  postID,
-  seeMore,
-}) => {
+const PostDetails = ({ post, seeMore }) => {
+  const { username, postUpdatedAt, postedAt, postBody, postID } = post;
   return (
     <>
       <div className="flex justify-between flex-row">

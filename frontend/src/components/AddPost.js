@@ -10,6 +10,9 @@ const AddPost = () => {
 
   const [addPost] = useMutation(ADD_POST, {
     variables: { postBody: postData.value },
+    update() {
+      setPostData({ ...postData, value: "" });
+    },
     onError(err) {
       setPostData({
         ...postData,

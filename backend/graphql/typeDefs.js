@@ -40,7 +40,6 @@ module.exports = gql`
     reactID: ID!
     postID: ID!
     reactedBy: String!
-    reactType: String!
     reactedAt: String!
   }
 
@@ -100,11 +99,6 @@ module.exports = gql`
     postID: ID!
   }
 
-  input ReactInput {
-    postID: ID!
-    reactType: String!
-  }
-
   input CommentInput {
     commentBody: String!,
     postID: ID!
@@ -126,6 +120,7 @@ module.exports = gql`
     getPost(postID: ID!): post!
     getMessages(dmID: ID!): [message]!
     getDMs: [dm]!
+    getReacts(postID: ID!): [react]!
   }
   
   type Mutation {
@@ -135,7 +130,7 @@ module.exports = gql`
     createPost(postBody: String!): post!
     updatePost(updatePostInput: UpdatePostInput): post!
     deletePost(postID: ID!): ID!
-    react(reactInput: ReactInput): react!
+    react(postID: ID!): react!
     comment(commentInput: CommentInput): comment!
     updateComment(updateCommentInput: UpdateCommentInput): comment!
     deleteComment(commentID: ID!): ID!

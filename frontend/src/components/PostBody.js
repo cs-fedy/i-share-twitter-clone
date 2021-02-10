@@ -1,11 +1,11 @@
 import PostDetails from "./PostDetails";
 import ReactionBar from "./ReactionBar";
 
-const PostBody = (props) => {
+const PostBody = ({ post, seeMore, isPostPage }) => {
   return (
     <>
-      <PostDetails {...props} />
-      <ReactionBar {...props} />
+      <PostDetails post={post} seeMore={seeMore} />
+      <ReactionBar post={post} isPostPage={isPostPage} />
     </>
   );
 };

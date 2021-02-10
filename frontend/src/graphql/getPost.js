@@ -12,7 +12,6 @@ const GET_POST = gql`
       postReacts {
         reactID
         reactedBy
-        reactType
       }
       postComments {
         commentID

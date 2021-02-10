@@ -11,6 +11,7 @@ const FEED_QUERY = gql`
       originalPostID
       postReacts {
         reactID
+        reactedBy
       }
       postComments {
         commentID

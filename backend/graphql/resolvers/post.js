@@ -63,6 +63,17 @@ module.exports = {
         throw new Error("you do not have the right to access this post");
       }
     },
+    //* get post x reacts list
+    async getReacts(parent, args, context, info) {
+      //* Check if the user has the right to get x post reacts or not
+      const { username } = checkAuth(context);
+      const { postID } = args;
+      //* if the post doesn't exist throw an error
+      const post = await Post.findById(postID);
+      if (!post) throw new Error("post does not exist");
+      const reacts = await React.find({ postID });
+      return reacts.forEach((react) => ({ ...react._doc, reactID: react._id }));
+    },
   },
 
   Mutation: {
@@ -156,9 +167,7 @@ module.exports = {
     async react(parent, args, context, info) {
       //* Check if the user has the right to react to the post or not
       const { username } = checkAuth(context);
-      const {
-        reactInput: { postID, reactType },
-      } = args;
+      const { postID } = args;
       //* if the post doesn't exist throw an error
       const post = await Post.findById(postID);
       if (!post) throw new Error("invalid post id");
@@ -175,7 +184,6 @@ module.exports = {
         const newReact = new React({
           postID,
           reactedBy: username,
-          reactType,
           reactedAt: new Date().toISOString(),
         });
         const res = await newReact.save();

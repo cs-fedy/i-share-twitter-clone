@@ -3,17 +3,37 @@ import { useQuery } from "@apollo/client";
 import Navbar from "../components/Navbar";
 import GET_POST from "../graphql/getPost";
 import PostBody from "../components/PostBody";
+import { useState } from "react";
 
 const Post = (props) => {
+  const [error, setError] = useState(false);
   const { postID } = useParams();
   const { data } = useQuery(GET_POST, {
     variables: { postID },
+    onError(err) {
+      setError(true);
+    },
   });
 
-  const removePost = () => {
+  const redirectToHome = () => {
     props.history.push("/");
   };
 
+  if (error) {
+    return (
+      <div className="w-screen h-screen flex justify-center items-center flex-col">
+        <h1 className="block text-gray-700 text-lg font-bold mb-3">
+          post doesn't exist
+        </h1>
+        <button
+          onClick={redirectToHome}
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 mr-2 rounded focus:outline-none focus:shadow-outline"
+        >
+          return to home
+        </button>
+      </div>
+    );
+  }
   return (
     <>
       <Navbar />
@@ -24,9 +44,8 @@ const Post = (props) => {
               <div className="border-4 border-dashed border-gray-200 rounded-lg px-8 py-4">
                 <PostBody
                   seeMore={false}
-                  removeCallback={removePost}
                   isPostPage={true}
-                  {...data.getPost}
+                  post={data.getPost}
                 />
               </div>
             </div>

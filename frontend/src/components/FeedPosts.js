@@ -29,7 +29,7 @@ const FeedPosts = (props) => {
     <div className="grid grid-cols-3">
       {queryData &&
         queryData.getPosts.map((post) => (
-          <FeedPost key={post.postID} {...post} />
+          <FeedPost key={post.postID} post={post} />
         ))}
     </div>
   );
