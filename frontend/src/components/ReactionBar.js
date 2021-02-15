@@ -14,6 +14,7 @@ const ReactionBar = ({ isPostPage, post }) => {
   const [clicked, setClicked] = useState(false);
   const { user: loggedUser } = useContext(AuthContext);
   const history = useHistory();
+
   useEffect(() => {
     if (postReacts.find((react) => react.reactedBy === loggedUser.username)) {
       setClicked(true);
@@ -48,39 +49,15 @@ const ReactionBar = ({ isPostPage, post }) => {
     }
   };
 
-  const [toggleReaction] = useMutation(TOGGLE_REACT, {
+  // TODO: fix toggle react
+  const [toggleReact] = useMutation(TOGGLE_REACT, {
     variables: { postID },
     update(cache, result) {
-      if (isPostPage) {
-        const { getPost } = cache.readQuery({
-          query: GET_POST,
-          variables: { postID },
-        });
-        let newPostReacts = getPost.postReacts;
-        if (
-          getPost.postReacts.find(
-            (react) => react.reactedBy === loggedUser.username
-          )
-        ) {
-          newPostReacts = getPost.postReacts.filter(
-            (react) => react.reactedBy !== loggedUser.username
-          );
-        } else {
-          newPostReacts = [...newPostReacts, result.data.react];
-        }
-        const newPost = { ...getPost, postReacts: newPostReacts };
-        cache.writeQuery({
-          query: GET_POST,
-          variables: { postID },
-          data: {
-            getPost: newPost,
-          },
-        });
-      } else {
-        const { getPosts } = cache.readQuery({
-          query: FEED_QUERY,
-        });
-
+      const response = cache.readQuery({
+        query: FEED_QUERY,
+      });
+      if (response) {
+        const { getPosts } = response;
         const newFeed = getPosts.map((post) => {
           if (post.postID === result.data.react.postID) {
             let newPostReacts = post.postReacts;
@@ -106,11 +83,34 @@ const ReactionBar = ({ isPostPage, post }) => {
           },
         });
       }
+      if (isPostPage) {
+        const { getPost } = cache.readQuery({
+          query: GET_POST,
+          variables: { postID },
+        });
+        let newPostReacts = getPost.postReacts;
+        if (
+          getPost.postReacts.find(
+            (react) => react.reactedBy === loggedUser.username
+          )
+        ) {
+          newPostReacts = getPost.postReacts.filter(
+            (react) => react.reactedBy !== loggedUser.username
+          );
+        } else {
+          newPostReacts = [...newPostReacts, result.data.react];
+        }
+        const newPost = { ...getPost, postReacts: newPostReacts };
+        cache.writeQuery({
+          query: GET_POST,
+          variables: { postID },
+          data: {
+            getPost: newPost,
+          },
+        });
+      }
     },
   });
-  const toggleReact = () => {
-    toggleReaction();
-  };
 
   return (
     <>

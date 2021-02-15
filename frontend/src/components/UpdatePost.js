@@ -28,6 +28,28 @@ const UpdatePost = ({ toggleHidden, postID, postBody, isPostPage }) => {
     updatePost({
       variables: { postID, newPostBody: postData.value },
       update(cache, result) {
+        const response = cache.readQuery({
+          query: FEED_QUERY,
+        });
+
+        if (response) {
+          const { getPosts: feed } = response; 
+        const newFeed = feed.map((post) => {
+          if (post.postID === postID) {
+            const { postBody, updatedAt } = result.data.updatePost;
+            return { ...post, postBody, updatedAt };
+          }
+          return post;
+        });
+
+        cache.writeQuery({
+          query: FEED_QUERY,
+          data: {
+            getPosts: newFeed,
+          },
+        });
+        }
+
         if (isPostPage) {
           const { getPost } = cache.readQuery({
             query: GET_POST,
@@ -44,24 +66,6 @@ const UpdatePost = ({ toggleHidden, postID, postBody, isPostPage }) => {
             variables: { postID },
             data: {
               getPost: newPost,
-            },
-          });
-        } else {
-          const { getPosts: feed } = cache.readQuery({
-            query: FEED_QUERY,
-          });
-          const newFeed = feed.map((post) => {
-            if (post.postID === postID) {
-              const { postBody, updatedAt } = result.data.updatePost;
-              return { ...post, postBody, updatedAt };
-            }
-            return post;
-          });
-
-          cache.writeQuery({
-            query: FEED_QUERY,
-            data: {
-              getPosts: newFeed,
             },
           });
         }
