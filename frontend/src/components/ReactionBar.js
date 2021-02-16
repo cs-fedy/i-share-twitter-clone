@@ -49,40 +49,9 @@ const ReactionBar = ({ isPostPage, post }) => {
     }
   };
 
-  // TODO: fix toggle react
   const [toggleReact] = useMutation(TOGGLE_REACT, {
     variables: { postID },
     update(cache, result) {
-      const response = cache.readQuery({
-        query: FEED_QUERY,
-      });
-      if (response) {
-        const { getPosts } = response;
-        const newFeed = getPosts.map((post) => {
-          if (post.postID === result.data.react.postID) {
-            let newPostReacts = post.postReacts;
-            if (
-              post.postReacts.find(
-                (react) => react.reactedBy === loggedUser.username
-              )
-            ) {
-              newPostReacts = post.postReacts.filter(
-                (react) => react.reactedBy !== loggedUser.username
-              );
-            } else {
-              newPostReacts = [...newPostReacts, result.data.react];
-            }
-            return { ...post, postReacts: newPostReacts };
-          }
-          return post;
-        });
-        cache.writeQuery({
-          query: FEED_QUERY,
-          data: {
-            getPosts: newFeed,
-          },
-        });
-      }
       if (isPostPage) {
         const { getPost } = cache.readQuery({
           query: GET_POST,
@@ -106,6 +75,34 @@ const ReactionBar = ({ isPostPage, post }) => {
           variables: { postID },
           data: {
             getPost: newPost,
+          },
+        });
+      } else {
+        const { getPosts } = cache.readQuery({
+          query: FEED_QUERY,
+        });
+        const newFeed = getPosts.map((post) => {
+          if (post.postID === result.data.react.postID) {
+            let newPostReacts = post.postReacts;
+            if (
+              post.postReacts.find(
+                (react) => react.reactedBy === loggedUser.username
+              )
+            ) {
+              newPostReacts = post.postReacts.filter(
+                (react) => react.reactedBy !== loggedUser.username
+              );
+            } else {
+              newPostReacts = [...newPostReacts, result.data.react];
+            }
+            return { ...post, postReacts: newPostReacts };
+          }
+          return post;
+        });
+        cache.writeQuery({
+          query: FEED_QUERY,
+          data: {
+            getPosts: newFeed,
           },
         });
       }

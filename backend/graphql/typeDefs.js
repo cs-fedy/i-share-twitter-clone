@@ -120,7 +120,6 @@ module.exports = gql`
     getPost(postID: ID!): post!
     getMessages(dmID: ID!): [message]!
     getDMs: [dm]!
-    getReacts(postID: ID!): [react]!
   }
   
   type Mutation {

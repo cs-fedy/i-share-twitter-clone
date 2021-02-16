@@ -38,7 +38,7 @@ const Login = (props) => {
   return (
     <div className="w-screen h-screen items-center justify-center flex">
       <form
-        className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4"
+        className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 flex flex-col gap-2"
         onSubmit={handleSubmit}
         noValidate
       >
@@ -48,6 +48,7 @@ const Login = (props) => {
           type="text"
           id="username"
           label="username"
+          className="mb-6"
           handleChange={handleChange}
           value={formValues.username}
         />
@@ -57,6 +58,7 @@ const Login = (props) => {
           type="password"
           id="password"
           label="password"
+          className="mb-6"
           handleChange={handleChange}
           value={formValues.password}
         />

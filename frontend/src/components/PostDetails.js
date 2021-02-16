@@ -1,5 +1,4 @@
 import moment from "moment";
-import { Link } from "react-router-dom";
 
 const PostDetails = ({ post, seeMore }) => {
   const { username, postUpdatedAt, postedAt, postBody, postID } = post;
@@ -27,9 +26,9 @@ const PostDetails = ({ post, seeMore }) => {
       <p className="text-gray-800 dark:text-gray-100 leading-snug md:leading-normal">
         {postBody}
         {seeMore && (
-          <Link className="underline ml-3" to={`/post/${postID}`}>
+          <a className="underline ml-3" href={`/post/${postID}`}>
             See post details
-          </Link>
+          </a>
         )}
       </p>
     </>

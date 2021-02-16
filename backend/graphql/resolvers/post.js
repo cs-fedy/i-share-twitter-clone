@@ -63,17 +63,6 @@ module.exports = {
         throw new Error("you do not have the right to access this post");
       }
     },
-    //* get post x reacts list
-    async getReacts(parent, args, context, info) {
-      //* Check if the user has the right to get x post reacts or not
-      const { username } = checkAuth(context);
-      const { postID } = args;
-      //* if the post doesn't exist throw an error
-      const post = await Post.findById(postID);
-      if (!post) throw new Error("post does not exist");
-      const reacts = await React.find({ postID });
-      return reacts.forEach((react) => ({ ...react._doc, reactID: react._id }));
-    },
   },
 
   Mutation: {
@@ -197,9 +186,15 @@ module.exports = {
     async comment(parent, args, context, info) {
       //* Check if the user has the right to comment a post or not
       const { username } = checkAuth(context);
+      //* throw an error if input is invalid
       const {
         commentInput: { commentBody, postID },
       } = args;
+      if (!commentBody.trim()) {
+        throw new UserInputError("empty field", {
+          errors: { comment: "comment body must not be empty" },
+        });
+      }
       //* if the post doesn't exist throw an error
       const post = await Post.findById(postID);
       if (!post) throw new Error("invalid post id");

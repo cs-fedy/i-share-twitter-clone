@@ -14,9 +14,9 @@ const Navbar = () => {
   return (
     <div className="bg-blue-100 flex justify-center mb-5">
     <nav className="flex flex-wrap items-center justify-between p-5 md:container">
-      <CustomLink to="/">I-share</CustomLink>
+      <CustomLink href="/">I-share</CustomLink>
       <div className="flex gap-4">
-        <CustomLink to="/user/:userID">
+        <CustomLink href="/user/:userID">
           {user.username}
         </CustomLink>
         <CustomLink to="#" role="button" onClick={handleClick}>

@@ -4,6 +4,7 @@ import Navbar from "../components/Navbar";
 import GET_POST from "../graphql/getPost";
 import PostBody from "../components/PostBody";
 import { useState } from "react";
+import CommentSection from "../components/CommentSection";
 
 const Post = (props) => {
   const [error, setError] = useState(false);
@@ -46,6 +47,10 @@ const Post = (props) => {
                   seeMore={false}
                   isPostPage={true}
                   post={data.getPost}
+                />
+                <CommentSection
+                  comments={data.getPost.postComments}
+                  postID={data.getPost.postID}
                 />
               </div>
             </div>
