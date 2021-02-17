@@ -221,6 +221,13 @@ module.exports = {
       //* if comment doesn't exist throw an error
       const comment = await Comment.findById(commentID);
       if (!comment) throw new Error("comment does not exist");
+      //* throw an error if input is invalid
+
+      if (!newCommentBody.trim()) {
+        throw new UserInputError("empty field", {
+          errors: { comment: "comment body must not be empty" },
+        });
+      }
       //* if the comment doesn't belong to the logged user throw an error
       if (comment.commentedBy !== username) {
         throw new Error("this is not your comment");

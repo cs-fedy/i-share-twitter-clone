@@ -1,5 +1,6 @@
 import moment from "moment";
 import RemovePost from "./RemovePost";
+import UpdatePost from "./UpdatePost";
 
 const Comment = ({ comment }) => {
   const { commentID, commentedBy, commentUpdatedAt, commentedAt, commentBody, postID } = comment;
@@ -26,6 +27,7 @@ const Comment = ({ comment }) => {
       <p>{commentBody}</p>
     </div>
     <div className="flex flex-row gap-1 mb-6">
+      <UpdatePost isComment={true} body={commentBody} postID={postID} commentID={commentID} />
       <RemovePost commentID={commentID} postID={postID} />
     </div>
     </div>
