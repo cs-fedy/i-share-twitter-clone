@@ -19,6 +19,7 @@ const GET_POST = gql`
         commentBody
         commentedAt
         commentUpdatedAt
+        postID
       }
     }
   }

@@ -1,9 +1,11 @@
 import moment from "moment";
+import RemovePost from "./RemovePost";
 
 const Comment = ({ comment }) => {
-  const { commentedBy, commentUpdatedAt, commentedAt, commentBody } = comment;
+  const { commentID, commentedBy, commentUpdatedAt, commentedAt, commentBody, postID } = comment;
   return (
-    <div className="flex flex-row gap-1 mb-2">
+    <div className="flex flex-row justify-between">
+          <div className="flex flex-row gap-1 mb-2">
       <div className="flex mb-4">
         <img
           className="w-12 h-12 rounded-full"
@@ -22,6 +24,10 @@ const Comment = ({ comment }) => {
         </div>
       </div>
       <p>{commentBody}</p>
+    </div>
+    <div className="flex flex-row gap-1 mb-6">
+      <RemovePost commentID={commentID} postID={postID} />
+    </div>
     </div>
   );
 };
