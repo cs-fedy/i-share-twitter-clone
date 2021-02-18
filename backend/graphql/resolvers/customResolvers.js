@@ -48,15 +48,19 @@ module.exports = {
         .filter((comment) => !comment.hidden)
         .map((comment) => ({ ...comment._doc, commentID: comment._id }));
     },
+    reposts: async (parent) => {
+      const result = await Post.find({ originalPostID: parent.postID });
+      return result.map((post) => ({ ...post._doc, postID: post._id }));
+    },
   },
   dm: {
     lastMessage: async (parent) => {
       const messages = await Message.find({ dmID: parent.dmID });
-      const lastMessage = messages[messages.length -1];
+      const lastMessage = messages[messages.length - 1];
       return {
         ...lastMessage._doc,
-        messageID: lastMessage._id
-      }
-    }
-  }
+        messageID: lastMessage._id,
+      };
+    },
+  },
 };

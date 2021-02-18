@@ -1,11 +1,19 @@
 import moment from "moment";
 
 const PostDetails = ({ post, seeMore }) => {
-  const { username, postUpdatedAt, postedAt, postBody, postID } = post;
+  const {
+    username,
+    postUpdatedAt,
+    postedAt,
+    postBody,
+    postID,
+    originalPostID,
+  } = post;
   return (
     <>
       <div className="flex justify-between flex-row">
-        <div className="flex mb-4">
+        <div className="flex mb-4 justify-between w-full">
+          <div className="flex flex-row">
           <img
             className="w-12 h-12 rounded-full"
             src="https://i.pravatar.cc/300"
@@ -21,6 +29,12 @@ const PostDetails = ({ post, seeMore }) => {
                 : moment(postedAt).fromNow()}
             </span>
           </div>
+          </div>
+          {originalPostID && (
+            <a className="underline" href={`/post/${originalPostID}`}>
+              See original post
+            </a>
+          )}
         </div>
       </div>
       <p className="text-gray-800 dark:text-gray-100 leading-snug md:leading-normal">

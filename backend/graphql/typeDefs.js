@@ -52,6 +52,7 @@ module.exports = gql`
     originalPostID: ID
     postReacts: [react]!
     postComments: [comment]!
+    reposts: [post]!
   }
 
   type message {

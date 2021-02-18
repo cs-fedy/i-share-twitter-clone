@@ -3,9 +3,17 @@ import UpdatePost from "../components/UpdatePost";
 import { AuthContext } from "../context/AuthContext";
 import ToggleReact from "./ToggleReact";
 import RemovePost from "./RemovePost";
+import Share from "./Share";
 
 const ReactionBar = ({ isPostPage, post }) => {
-  const { postReacts, username, postComments, postID, postBody } = post;
+  const {
+    postReacts,
+    username,
+    postComments,
+    postID,
+    postBody,
+    reposts,
+  } = post;
   const { user: loggedUser } = useContext(AuthContext);
 
   return (
@@ -26,24 +34,34 @@ const ReactionBar = ({ isPostPage, post }) => {
         <div className="flex flex-row">
           {username === loggedUser.username && (
             <>
-              <div className="ml-3 inline-flex rounded-md shadow mr-2">
+              <div className="ml-3 inline-flex rounded-md shadow">
                 <UpdatePost
                   postID={postID}
                   body={postBody}
                   isPostPage={isPostPage}
                 />
               </div>
-              <div className="inline-flex rounded-md shadow">
+              <div className="ml-3 inline-flex rounded-md shadow">
                 <RemovePost isPostPage={isPostPage} postID={postID} />
               </div>
             </>
           )}
+          <div className="ml-3 inline-flex rounded-md shadow">
+            <Share postID={postID} isPostPage={isPostPage} />
+          </div>
         </div>
       </div>
-      <div className="ml-1 text-gray-500 dark:text-gray-400 font-light">
-        {postComments.length > 1
-          ? `${postComments.length} comments`
-          : `${postComments.length} comment`}
+      <div className="flex flex-col ml-1 text-gray-500 dark:text-gray-400 font-light">
+        <p>
+          {postComments.length > 1
+            ? `${postComments.length} comments`
+            : `${postComments.length} comment`}
+        </p>
+        <p>
+          {reposts.length > 1
+            ? `${reposts.length} shares`
+            : `${reposts.length} share`}
+        </p>
       </div>
     </div>
   );

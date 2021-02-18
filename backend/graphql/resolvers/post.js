@@ -280,7 +280,7 @@ module.exports = {
         if (!isFollower && targetUser.accountType === "private")
           throw new Error("follow first to share the post");
       }
-      //* create, save and return the shared post
+      //* create, save, publish and return the shared post
       const newPost = new Post({
         username,
         postBody: post.postBody,
@@ -288,10 +288,12 @@ module.exports = {
         originalPostID: post._id,
       });
       const result = await newPost.save();
-      return {
+      const returnedPost = {
         ...result._doc,
         postID: result._id,
       };
+      context.pubsub.publish("POST_ADDED", returnedPost);
+      return returnedPost;
     },
   },
 };

@@ -16,6 +16,9 @@ const FEED_QUERY = gql`
       postComments {
         commentID
       }
+      reposts {
+        postID
+      }
     }
   }
 `;

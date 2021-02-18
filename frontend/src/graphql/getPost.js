@@ -21,6 +21,9 @@ const GET_POST = gql`
         commentUpdatedAt
         postID
       }
+      reposts {
+        postID
+      }
     }
   }
 `;
