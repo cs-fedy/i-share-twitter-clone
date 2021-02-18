@@ -8,6 +8,7 @@ module.exports = {
   Query: {
     ...userResolvers.Query,
     ...postResolvers.Query,
+    ...bookmarkResolvers.Query,
     ...dmResolvers.Query,
   },
 

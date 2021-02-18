@@ -119,6 +119,7 @@ module.exports = gql`
     getUser(userID: ID): user!
     getPosts: [post]!
     getPost(postID: ID!): post!
+    getBookmarks:[bookmark]!
     getMessages(dmID: ID!): [message]!
     getDMs: [dm]!
   }

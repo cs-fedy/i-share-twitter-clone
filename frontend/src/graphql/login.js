@@ -6,6 +6,9 @@ const LOG_USER = gql`
       userID
       username
       token
+      userBookmarks {
+        postID
+      }
     }
   }
 `;

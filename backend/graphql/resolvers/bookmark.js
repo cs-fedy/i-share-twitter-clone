@@ -5,6 +5,20 @@ const Post = require("../../models/posts");
 const checkAuth = require("../../util/checkAuth");
 
 module.exports = {
+  Query: {
+    //* GET_BOOKMARKS: get logged user saved bookmarks
+    async getBookmarks(parent, args, context, info) {
+      //* Check if logged user has the right to get the bookmarks or no
+      const { username } = checkAuth(context);
+      //* fetch and return bookmarks list if exist
+      const bookmarks = await Bookmark.find({ username });
+      return bookmarks.map((bookmark) => ({
+        ...bookmark._doc,
+        bookmarkID: bookmark._id,
+      }));
+    },
+  },
+
   Mutation: {
     //* TOGGLE_BOOKMARK: if a post exist in bookmarks list remove it else add it
     async toggleBookmark(parent, args, context, info) {

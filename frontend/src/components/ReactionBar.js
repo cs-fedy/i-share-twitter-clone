@@ -4,6 +4,7 @@ import { AuthContext } from "../context/AuthContext";
 import ToggleReact from "./ToggleReact";
 import RemovePost from "./RemovePost";
 import Share from "./Share";
+import BookmarkPost from "./BookmarkPost";
 
 const ReactionBar = ({ isPostPage, post }) => {
   const {
@@ -48,6 +49,9 @@ const ReactionBar = ({ isPostPage, post }) => {
           )}
           <div className="ml-3 inline-flex rounded-md shadow">
             <Share postID={postID} isPostPage={isPostPage} />
+          </div>
+          <div className="ml-3 inline-flex rounded-md shadow">
+            <BookmarkPost postID={postID} />
           </div>
         </div>
       </div>
