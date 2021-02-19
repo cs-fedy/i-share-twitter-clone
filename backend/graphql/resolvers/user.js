@@ -20,9 +20,9 @@ module.exports = {
     async getUser(parent, args, context, info) {
       //* check if user has the right to get a user or not
       const authUser = checkAuth(context);
-      const { userID } = args;
+      const { username } = args;
       //* throw an error if the target user doesn't exist
-      const user = await User.findById(userID);
+      const user = await User.findOne({ username });
       if (!user) throw new Error("user does not exist");
       //* else return the target user
       return {

@@ -1,4 +1,5 @@
 import moment from "moment";
+import CustomLink from "./CustomLink";
 
 const PostDetails = ({ post, seeMore }) => {
   const {
@@ -20,9 +21,9 @@ const PostDetails = ({ post, seeMore }) => {
             alt=""
           />
           <div className="ml-2 mt-0.5">
-            <span className="block font-medium text-base leading-snug text-black dark:text-gray-100">
+            <CustomLink href={`/user/${username}`}>
               {username}
-            </span>
+            </CustomLink>
             <span className="block text-sm text-gray-500 dark:text-gray-400 font-light leading-snug">
               {postUpdatedAt
                 ? moment(postUpdatedAt).fromNow()

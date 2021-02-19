@@ -27,7 +27,7 @@ module.exports = gql`
     followedAt: String!
   }
 
-  type comment {  
+  type comment {
     commentID: ID!
     postID: ID!
     commentedBy: String!
@@ -101,7 +101,7 @@ module.exports = gql`
   }
 
   input CommentInput {
-    commentBody: String!,
+    commentBody: String!
     postID: ID!
   }
 
@@ -116,14 +116,14 @@ module.exports = gql`
   }
 
   type Query {
-    getUser(userID: ID): user!
+    getUser(username: String!): user!
     getPosts: [post]!
     getPost(postID: ID!): post!
-    getBookmarks:[bookmark]!
+    getBookmarks: [bookmark]!
     getMessages(dmID: ID!): [message]!
     getDMs: [dm]!
   }
-  
+
   type Mutation {
     login(loginInput: LoginInput): user!
     signup(signupInput: SignupInput): user!

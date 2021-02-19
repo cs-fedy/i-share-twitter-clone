@@ -16,7 +16,7 @@ const Navbar = () => {
     <nav className="flex flex-wrap items-center justify-between p-5 md:container">
       <CustomLink href="/">I-share</CustomLink>
       <div className="flex gap-4">
-        <CustomLink href="/user/:userID">
+        <CustomLink href={`/user/${user.username}`}>
           {user.username}
         </CustomLink>
         <CustomLink to="#" role="button" onClick={handleClick}>

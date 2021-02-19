@@ -1,7 +1,7 @@
 //* models
 const Post = require("../../models/posts");
 const Bookmark = require("../../models/bookmarks");
-const Follow = require("../../models/bookmarks");
+const Follow = require("../../models/follows");
 const React = require("../../models/reacts");
 const Comment = require("../../models/comments");
 const Message = require("../../models/messages");

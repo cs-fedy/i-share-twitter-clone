@@ -5,6 +5,7 @@ import Signup from "./pages/Signup";
 import { AuthProvider } from "./context/AuthContext";
 import { LoggedRoutes, NotLoggedRoutes } from './components/PrivateRoute';
 import Post from "./pages/Post";
+import User from "./pages/User";
 
 const App = () => {
   return (
@@ -12,7 +13,8 @@ const App = () => {
       <BrowserRouter>
         <Switch>
           <LoggedRoutes exact path="/" component={Home} />
-          <LoggedRoutes exact path="/post/:postID" component={Post} />
+          <LoggedRoutes path="/post/:postID" component={Post} />
+          <LoggedRoutes path="/user/:username" component={User} />
           <NotLoggedRoutes path="/login" component={Login} />
           <NotLoggedRoutes path="/signup" component={Signup} />
         </Switch>
