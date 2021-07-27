@@ -1,6 +1,6 @@
-//* models
-const Bookmark = require("../../models/bookmarks");
-const Post = require("../../models/posts");
+//* services
+const BookmarkServices = require("../../services/bookmark");
+const PostServices = require("../../services/post");
 //* utils
 const checkAuth = require("../../util/checkAuth");
 
@@ -11,7 +11,7 @@ module.exports = {
       //* Check if logged user has the right to get the bookmarks or no
       const { username } = checkAuth(context);
       //* fetch and return bookmarks list if exist
-      const bookmarks = await Bookmark.find({ username });
+      const bookmarks = await BookmarkServices.getUserBookmarks(username);
       return bookmarks.map((bookmark) => ({
         ...bookmark._doc,
         bookmarkID: bookmark._id,
@@ -26,27 +26,26 @@ module.exports = {
       const { username } = checkAuth(context);
       const { postID } = args;
       //* if the post doesn't exist throw an error
-      const post = await Post.findById(postID);
+      const post = await PostServices.getPost(postID);
       if (!post) {
         throw new Error("post does not exist");
       }
       //* if the post isn't bookmarked add it
-      const bookmark = await Bookmark.findOne({ postID });
+      const bookmark = await BookmarkServices.getBookmark(postID, username);
       if (!bookmark) {
         //* create, save and return the bookmark
-        const newBookmark = new Bookmark({
+        const res = await BookmarkServices.createBookmark({
           username,
           postID,
           bookmarkedAt: new Date().toISOString(),
         });
-        const res = await newBookmark.save();
         return {
           ...res._doc,
           bookmarkID: res._id,
         };
       } else {
         //* remove the bookmark and return it
-        await bookmark.remove();
+        await BookmarkServices.removeBookmark(bookmark.bookmarkID);
         return {
           ...bookmark._doc,
           bookmarkID: bookmark._id,

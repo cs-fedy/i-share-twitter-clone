@@ -2,9 +2,6 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { UserInputError } = require("apollo-server");
-//* Models
-const User = require("../../models/users");
-const Follow = require("../../models/follows");
 //* utils
 const {
   validateSignupInput,
@@ -13,6 +10,9 @@ const {
 const checkAuth = require("../../util/checkAuth");
 //* env vars
 const jwtSecret = process.env.jwtSecret;
+//* services
+const userService = require("../../services/user");
+const followService = require("../../services/follow");
 
 module.exports = {
   Query: {
@@ -22,7 +22,7 @@ module.exports = {
       const authUser = checkAuth(context);
       const { username } = args;
       //* throw an error if the target user doesn't exist
-      const user = await User.findOne({ username });
+      const user = await userService.getUser(username);
       if (!user) throw new Error("user does not exist");
       //* else return the target user
       return {
@@ -44,7 +44,7 @@ module.exports = {
         throw new UserInputError("invalid credentials", { errors });
       }
       //* throw an error if the user doesn't exist
-      const user = await User.findOne({ username });
+      const user = await userService.getUser(username);
       if (!user) {
         throw new UserInputError("invalid username", {
           errors: { username: "user does not exist" },
@@ -66,6 +66,7 @@ module.exports = {
         token,
       };
     },
+
     //* SIGNUP: register a new user
     async signup(parent, args, context, info) {
       const {
@@ -82,7 +83,7 @@ module.exports = {
         throw new UserInputError("invalid credentials", { errors });
       }
       //* throw an error if new user is already registered
-      const alreadyRegistered = await User.findOne({ username });
+      const alreadyRegistered = await userService.getUser(username);
       if (alreadyRegistered) {
         throw new UserInputError("username is taken", {
           errors: { username: "username is taken" },
@@ -90,52 +91,49 @@ module.exports = {
       }
       //* hash the password and save the new user in the db
       const hashedPassword = await bcrypt.hash(password, 12);
-      const newUser = new User({
+      const newUser = await userService.createUser({
         email,
         password: hashedPassword,
         username,
         accountCreatedAt: new Date().toISOString(),
         accountType: "public",
       });
-      const res = await newUser.save();
+
       //* sign a new jwt and return the new user
-      const token = await jwt.sign({ userID: res._id, username }, jwtSecret, {
-        expiresIn: "2h",
-      });
+      const token = await jwt.sign(
+        { userID: newUser._id, username },
+        jwtSecret,
+        {
+          expiresIn: "2h",
+        }
+      );
       return {
-        ...res._doc,
-        userID: res._id,
+        ...newUser._doc,
+        userID: newUser._id,
         token,
       };
     },
+
     //* TOGGLE_FOLLOW: if user is following the target user remove the follow, else create a new follow
     async toggleFollow(parent, args, context, info) {
       //* check if user has the right to toggle follow or not
       const { username } = checkAuth(context);
       const { targetUsername } = args;
       //* get the follow from the db
-      const follow = await Follow.findOne({
-        follower: username,
-        following: targetUsername,
-      });
+      const follow = await followService.getFollow(username, targetUsername);
       if (follow) {
         //* remove and return the follow if it exist
-        await follow.remove();
+        await followService.removeFollow(follow._id);
         return {
           ...follow._doc,
           followID: follow._id,
         };
       } else {
         //* create and return the new follow
-        const newFollow = new Follow({
-          follower: username,
-          following: targetUsername,
-          followedAt: new Date().toISOString(),
-        });
-        const result = await newFollow.save();
+        const newFollow = followService.createFollow(username, targetUsername);
         return {
-          ...result._doc,
-          followID: result._id,
+          ...newFollow._doc,
+          followID: newFollow._id,
         };
       }
     },

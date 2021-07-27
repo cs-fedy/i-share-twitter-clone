@@ -1,14 +1,14 @@
 //* global libraries
 const { UserInputError } = require("apollo-server");
-//* models
-const Post = require("../../models/posts");
-const User = require("../../models/users");
-const Follow = require("../../models/follows");
-const React = require("../../models/reacts");
-const Comment = require("../../models/comments");
 //* utils
 const checkAuth = require("../../util/checkAuth");
-const { user } = require("./customResolvers");
+//* services
+const FollowService = require("../../services/follow");
+const PostService = require("../../services/post");
+const UserService = require("../../services/user");
+const ReactService = require("../../services/react");
+const CommentService = require("../../services/comment");
+
 module.exports = {
   Query: {
     //* GET_POSTS: get the posts of user followings(logged user is included): home screen posts
@@ -16,14 +16,16 @@ module.exports = {
       //* Check if the user has the right to get posts or not
       const { username } = checkAuth(context);
       //* get the following of the logged user
-      const follows = await Follow.find({ follower: username });
+      const follows = await followService.get({ follower: username });
+
       const following = follows.map((follow) => follow.following);
       following.push(username);
       //* get followings posts
       const posts = following.map(
-        async (currentUser) => await Post.find({ username: currentUser })
+        async (currentUser) => await PostService.getUserPosts(currentUser)
       );
       const result = await Promise.all(posts);
+
       //* return followings posts
       return result
         .flat()
@@ -33,13 +35,14 @@ module.exports = {
           postID: post._id,
         }));
     },
+
     //* GET_POST: if the account of the owner of the post is public or followed by logged user return the post
     async getPost(parent, args, context, info) {
       //* Check if the user has the right to get x post or not
       const { username } = checkAuth(context);
       const { postID } = args;
       //* if the post doesn't exist throw an error
-      const post = await Post.findById(postID);
+      const post = await PostService.getPost(postID);
       if (!post) throw new Error("post does not exist");
       //* if target user is logged user return the post
       if (username === post.username) {
@@ -49,11 +52,11 @@ module.exports = {
         };
       } else {
         //* else if target user's account public or logged user is a follower return the user
-        const { accountType } = await User.find({ username: post.username });
-        const isTargetUserFollowed = await Follow.find({
-          follower: username,
-          following: post.username,
-        });
+        const { accountType } = await UserService.getUser(post.username);
+        const isTargetUserFollowed = await FollowService.getFollow(
+          username,
+          post.username
+        );
         if (accountType === "public" || isTargetUserFollowed)
           return {
             ...post._doc,
@@ -78,12 +81,12 @@ module.exports = {
         });
       }
       //* create, save, publish and return the new post
-      const newPost = new Post({
+      const res = PostService.createPost({
         username,
         postBody,
         postedAt: new Date().toISOString(),
       });
-      const res = await newPost.save();
+
       const returnedPost = {
         ...res._doc,
         postID: res._id,
@@ -91,6 +94,7 @@ module.exports = {
       context.pubsub.publish("POST_ADDED", returnedPost);
       return returnedPost;
     },
+
     //* UPDATE_POST: update the post if it belongs to the logged user
     async updatePost(parent, args, context, info) {
       //* check if the user has the right to update the post or not
@@ -99,7 +103,7 @@ module.exports = {
         updatePostInput: { newPostBody, postID },
       } = args;
       //* if the post doesn't exist throw an error
-      const post = await Post.findById(postID);
+      const post = await PostService.getPost(postID);
       if (!post) {
         throw new Error("post id not valid");
       }
@@ -116,26 +120,21 @@ module.exports = {
         });
       }
       //* update and return the post
-      const res = await Post.updateOne(
-        { _id: postID },
-        {
-          postBody: newPostBody,
-          postUpdatedAt: new Date().toISOString(),
-        }
-      );
+      const res = await PostService.updatePost(newPostBody);
       return {
         ...post._doc,
         postBody: newPostBody,
         postID,
       };
     },
+
     //* DELETE_POST: delete the post if it belongs to the logged user
     async deletePost(parent, args, context, info) {
       //* check if the user has the right to delete the post or not
       const { username } = checkAuth(context);
       const { postID } = args;
       //* if the post doesn't exist throw an error
-      const post = await Post.findById(postID);
+      const post = await PostService.getPost(postID);
       if (!post) {
         throw new Error("post id not valid");
       }
@@ -146,42 +145,44 @@ module.exports = {
         );
       }
       //* remove post reacts and comments
-      await React.remove({ postID });
-      await Comment.remove({ postID });
+      await ReactService.clearReacts(postID);
+      await CommentService.clearComments(postID);
+      // TODO: remove chared posts
       //* remove and return the post
-      await Post.remove({ _id: postID });
+      await PostService.removePost(postID);
       return postID;
     },
+
     //* REACT: if user already reacted on the post delete, else create new react
     async react(parent, args, context, info) {
       //* Check if the user has the right to react to the post or not
       const { username } = checkAuth(context);
       const { postID } = args;
       //* if the post doesn't exist throw an error
-      const post = await Post.findById(postID);
+      const post = await PostService.getPost(postID);
       if (!post) throw new Error("invalid post id");
       //* if logged user already reacted on the post remove the react
-      const userReact = await React.findOne({ reactedBy: username, postID });
+      const userReact = await ReactService.getReact(username, postID);
       if (userReact) {
-        await userReact.remove();
+        await ReactService.removeReact(userReact._id);
         return {
           ...userReact._doc,
           reactID: userReact._id,
         };
       } else {
         //* else create, save and return the new react
-        const newReact = new React({
+        const res = await ReactService.createReact({
           postID,
           reactedBy: username,
           reactedAt: new Date().toISOString(),
         });
-        const res = await newReact.save();
         return {
           ...res._doc,
           reactID: res._id,
         };
       }
     },
+
     //* COMMENT: add comment ont a post
     async comment(parent, args, context, info) {
       //* Check if the user has the right to comment a post or not
@@ -196,21 +197,21 @@ module.exports = {
         });
       }
       //* if the post doesn't exist throw an error
-      const post = await Post.findById(postID);
+      const post = await PostService.getPost(postID);
       if (!post) throw new Error("invalid post id");
       //* create, save and return new comment
-      const newComment = new Comment({
+      const res = await CommentService.createComment({
         postID,
         commentedBy: username,
         commentBody,
         commentedAt: new Date().toISOString(),
       });
-      const res = await newComment.save();
       return {
         ...res._doc,
         commentID: res._id,
       };
     },
+
     //* UPDATE_COMMENT: if the comment belong to the logged user update it
     async updateComment(parent, args, context, info) {
       //* Check if the user has the right to update a comment or not
@@ -219,7 +220,7 @@ module.exports = {
         updateCommentInput: { commentID, newCommentBody },
       } = args;
       //* if comment doesn't exist throw an error
-      const comment = await Comment.findById(commentID);
+      const comment = await CommentService.getComment(commentID);
       if (!comment) throw new Error("comment does not exist");
       //* throw an error if input is invalid
 
@@ -233,21 +234,24 @@ module.exports = {
         throw new Error("this is not your comment");
       }
       //* update and return the comment
-      comment.commentBody = newCommentBody;
-      comment.commentUpdatedAt = new Date().toISOString();
-      await Comment.updateOne({ _id: commentID }, comment);
+      await CommentService.updateComment(commentID, {
+        ...comment,
+        commentBody: newCommentBody,
+        commentUpdatedAt: new Date().toISOString(),
+      });
       return {
         ...comment._doc,
         commentID: comment._id,
       };
     },
+
     //* DELETE_COMMENT: if the comment belong to the logged user delete it
     async deleteComment(parent, args, context, info) {
       //* Check if the user has the right to update a comment or not
       const { username } = checkAuth(context);
       const { commentID } = args;
       //* if comment doesn't exist throw an error
-      const comment = await Comment.findById(commentID);
+      const comment = await CommentService.getComment(commentID);
       if (!comment) {
         throw new Error("comment does not exist");
       }
@@ -256,38 +260,39 @@ module.exports = {
         throw new Error("this is not your comment");
       }
       //* remove the comment and return its id
-      await comment.remove();
+      await CommentService.removeComment(comment._id);
       return commentID;
     },
+
     //* SHARE_POST: share a post
     async sharePost(parent, args, context, info) {
       //* Check if the user has the right to share a post or not
       const { username } = checkAuth(context);
       const { postID } = args;
       //* if the post doesn't exist throw an error
-      const post = await Post.findById(postID);
+      const post = await PostService.getPost(postID);
       if (!post) {
         throw new Error("post does not exist");
       }
       //* if the target user isn't the logged user do:
-      const targetUser = await User.findOne({ username: post.username });
+      const targetUser = await UserService.getUser(post.username);
       if (targetUser.username !== username) {
         //* throw an error if the logged user is restricted to share the post
-        const isFollower = await Follow.findOne({
-          follower: username,
-          following: targetUser.username,
-        });
+        const isFollower = await FollowService.getFollow(
+          username,
+          targetUsername
+        );
         if (!isFollower && targetUser.accountType === "private")
           throw new Error("follow first to share the post");
       }
       //* create, save, publish and return the shared post
-      const newPost = new Post({
+      const result = await PostService.createPost({
         username,
         postBody: post.postBody,
         postedAt: new Date().toISOString(),
         originalPostID: post._id,
       });
-      const result = await newPost.save();
+
       const returnedPost = {
         ...result._doc,
         postID: result._id,
