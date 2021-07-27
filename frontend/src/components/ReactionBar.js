@@ -1,4 +1,4 @@
-import { useState, useContext, useEffect } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import UpdatePost from "../components/UpdatePost";
 import { AuthContext } from "../context/AuthContext";
 import ToggleReact from "./ToggleReact";
@@ -34,7 +34,7 @@ const ReactionBar = ({ isPostPage, post }) => {
         </div>
         <div className="flex flex-row">
           {username === loggedUser.username && (
-            <>
+            <React.Fragment>
               <div className="ml-3 inline-flex rounded-md shadow">
                 <UpdatePost
                   postID={postID}
@@ -45,7 +45,7 @@ const ReactionBar = ({ isPostPage, post }) => {
               <div className="ml-3 inline-flex rounded-md shadow">
                 <RemovePost isPostPage={isPostPage} postID={postID} />
               </div>
-            </>
+            </React.Fragment>
           )}
           <div className="ml-3 inline-flex rounded-md shadow">
             <Share postID={postID} isPostPage={isPostPage} />

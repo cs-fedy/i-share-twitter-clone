@@ -1,3 +1,4 @@
+import React from "react"
 import {
   ApolloClient,
   createHttpLink,
@@ -30,7 +31,7 @@ const wsLink = new WebSocketLink({
 });
 
 const httpLink = createHttpLink({
-  uri: "http://localhost:4000",
+  uri: "http://localhost:3000",
 });
 
 //* use split for proper “routing” of the requests and update the constructor call of ApolloClient

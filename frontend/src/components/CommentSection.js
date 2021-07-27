@@ -1,3 +1,4 @@
+import React from "react"
 import CommentsForm from "./CommentsForm";
 import Comments from "./Comments";
 

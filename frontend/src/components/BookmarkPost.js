@@ -1,3 +1,4 @@
+import React from "react"
 import { useState, useEffect } from "react";
 import { useMutation, useQuery } from "@apollo/client";
 import TOGGLE_BOOKMARK from "../graphql/toggleBookmark";

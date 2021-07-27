@@ -1,3 +1,4 @@
+import React from "react"
 import { useMutation } from "@apollo/client";
 import SHARE_POST from "../graphql/sharePost";
 import GET_POST from "../graphql/getPost";

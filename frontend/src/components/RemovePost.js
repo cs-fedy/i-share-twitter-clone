@@ -1,3 +1,4 @@
+import React from "react"
 import { useMutation } from "@apollo/client";
 import DELETE_POST from "../graphql/deletePost";
 import FEED_QUERY from "../graphql/feedQuery";

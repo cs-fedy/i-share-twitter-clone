@@ -3,7 +3,7 @@ import { useQuery } from "@apollo/client";
 import Navbar from "../components/Navbar";
 import GET_POST from "../graphql/getPost";
 import PostBody from "../components/PostBody";
-import { useState } from "react";
+import React, { useState } from "react";
 import CommentSection from "../components/CommentSection";
 
 const Post = (props) => {
@@ -36,7 +36,7 @@ const Post = (props) => {
     );
   }
   return (
-    <>
+    <React.Fragment>
       <Navbar />
       {data && (
         <main>
@@ -57,7 +57,7 @@ const Post = (props) => {
           </div>
         </main>
       )}
-    </>
+    </React.Fragment>
   );
 };
 

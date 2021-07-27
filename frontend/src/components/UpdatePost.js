@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { useMutation } from "@apollo/client";
 import UPDATE_POST from "../graphql/updatePost";
 import FEED_QUERY from "../graphql/feedQuery";
@@ -119,7 +119,7 @@ const UpdatePost = ({ postID, commentID, body, isPostPage, isComment }) => {
     toggleHidden();
   };
   return (
-    <>
+    <React.Fragment>
       <button
         onClick={toggleHidden}
         className="inline-flex items-center justify-center px-1 py-1 border border-transparent text-base font-medium rounded-md text-green-700 bg-white hover:bg-green-700 hover:text-white"
@@ -174,7 +174,7 @@ const UpdatePost = ({ postID, commentID, body, isPostPage, isComment }) => {
           </div>
         </div>
       )}
-    </>
+    </React.Fragment>
   );
 };
 

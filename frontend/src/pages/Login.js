@@ -1,4 +1,4 @@
-import { useState, useContext } from "react";
+import React, { useState, useContext } from "react";
 import Input from "../components/Input";
 import { Link } from "react-router-dom";
 import { useMutation } from "@apollo/client";
@@ -20,6 +20,7 @@ const Login = (props) => {
 
   const [logUser] = useMutation(LOG_USER, {
     onError(err) {
+      console.log(err);
       setErrors(err.graphQLErrors[0].extensions.exception.errors);
     },
   });

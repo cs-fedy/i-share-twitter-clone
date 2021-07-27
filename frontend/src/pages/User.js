@@ -1,3 +1,4 @@
+import React from "react"
 import { useParams } from "react-router-dom";
 import { useQuery } from "@apollo/client";
 import GET_USER from "../graphql/getUser";
@@ -12,7 +13,7 @@ const User = () => {
     variables: { username },
   });
   return (
-    <>
+    <React.Fragment>
       {data && (
         <div className="py-12 h-screen">
           <div className="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-md">
@@ -47,7 +48,7 @@ const User = () => {
           </div>
         </div>
       )}
-    </>
+    </React.Fragment>
   );
 };
 

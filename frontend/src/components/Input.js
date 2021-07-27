@@ -1,8 +1,10 @@
+import React from "react"
+
 const Input = (props) => {
   const { error, name, type, id, label, handleChange, value } = props;
 
   return (
-    <>
+    <React.Fragment>
       <label
         htmlFor={id}
         className="block text-gray-700 text-sm font-bold mb-2"
@@ -20,7 +22,7 @@ const Input = (props) => {
       {error && (
         <p className="text-red-500 text-xs italic">{error}</p>
       )}
-    </>
+    </React.Fragment>
   );
 };
 

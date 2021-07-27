@@ -1,3 +1,4 @@
+import React from "react"
 import PostBody from "./PostBody";
 
 const FeedPost = ({ post }) => {

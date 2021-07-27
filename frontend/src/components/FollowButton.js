@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useMutation } from "@apollo/client";
 import TOGGLE_FOLLOW from "../graphql/toggleFollow";
 import GET_USER from "../graphql/getUser";

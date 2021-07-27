@@ -1,3 +1,4 @@
+import React from "react"
 import moment from "moment";
 import RemovePost from "./RemovePost";
 import UpdatePost from "./UpdatePost";

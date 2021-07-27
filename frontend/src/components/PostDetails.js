@@ -1,4 +1,5 @@
 import moment from "moment";
+import React from "react";
 import CustomLink from "./CustomLink";
 
 const PostDetails = ({ post, seeMore }) => {
@@ -11,7 +12,7 @@ const PostDetails = ({ post, seeMore }) => {
     originalPostID,
   } = post;
   return (
-    <>
+    <React.Fragment>
       <div className="flex justify-between flex-row">
         <div className="flex mb-4 justify-between w-full">
           <div className="flex flex-row">
@@ -46,7 +47,7 @@ const PostDetails = ({ post, seeMore }) => {
           </a>
         )}
       </p>
-    </>
+    </React.Fragment>
   );
 };
 

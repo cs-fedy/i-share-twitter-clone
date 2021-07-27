@@ -1,3 +1,4 @@
+import React from "react"
 import { useQuery } from "@apollo/client";
 import FeedPost from "./FeedPost";
 import FEED_QUERY from "../graphql/feedQuery";
