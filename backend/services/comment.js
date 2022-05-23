@@ -22,7 +22,7 @@ class Comment {
   }
 
   async getPostComments(postID) {
-    return await CommentModelComment.find({ postID });
+    return await CommentModel.find({ postID });
   }
 }
 

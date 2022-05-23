@@ -14,6 +14,7 @@ const AddPost = () => {
       setPostData({ ...postData, value: "" });
     },
     onError(err) {
+      console.log(err)
       setPostData({
         ...postData,
         error: err.graphQLErrors[0].extensions.exception.errors.post,

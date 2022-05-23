@@ -12,7 +12,8 @@ const FeedPosts = (props) => {
     updateQuery: (prev, { subscriptionData }) => {
       if (!subscriptionData.data) return prev;
       const newPost = subscriptionData.data.postAdded;
-      const exists = prev.getPosts.find(
+      const prevPosts = prev.getPosts || []
+      const exists = prevPosts.find(
         ({ postID }) => postID === newPost.postID
       );
       if (exists) {

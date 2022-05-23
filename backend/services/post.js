@@ -13,7 +13,7 @@ class Post {
     return await PostModel.create(postData);
   }
 
-  async updatePost(newPostBody) {
+  async updatePost(postID, newPostBody) {
     return await PostModel.updateOne(
       { _id: postID },
       {

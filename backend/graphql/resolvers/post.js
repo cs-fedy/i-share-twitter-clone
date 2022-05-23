@@ -16,7 +16,7 @@ module.exports = {
       //* Check if the user has the right to get posts or not
       const { username } = checkAuth(context);
       //* get the following of the logged user
-      const follows = await followService.get({ follower: username });
+      const follows = await FollowService.get({ follower: username });
 
       const following = follows.map((follow) => follow.following);
       following.push(username);
@@ -81,7 +81,7 @@ module.exports = {
         });
       }
       //* create, save, publish and return the new post
-      const res = PostService.createPost({
+      const res = await PostService.createPost({
         username,
         postBody,
         postedAt: new Date().toISOString(),
@@ -120,7 +120,7 @@ module.exports = {
         });
       }
       //* update and return the post
-      const res = await PostService.updatePost(newPostBody);
+      const res = await PostService.updatePost(postID, newPostBody);
       return {
         ...post._doc,
         postBody: newPostBody,
@@ -234,11 +234,12 @@ module.exports = {
         throw new Error("this is not your comment");
       }
       //* update and return the comment
-      await CommentService.updateComment(commentID, {
+      const res = await CommentService.updateComment(commentID, {
         ...comment,
         commentBody: newCommentBody,
         commentUpdatedAt: new Date().toISOString(),
       });
+      console.log(res);
       return {
         ...comment._doc,
         commentID: comment._id,
